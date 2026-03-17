@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CentroSaúde — Memorando Interno</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg:            #06080F;
+    --surface:       #0B0E1A;
+    --surface-2:     #0E1220;
+    --border:        rgba(255,255,255,0.05);
+    --border-accent: rgba(255,255,255,0.10);
+
+    --text-primary:   #E8ECF4;
+    --text-secondary: #6B7899;
+    --text-muted:     #2E3550;
+
+    --blue:           #2B5CE6;
+    --blue-mid:       #4070F4;
+    --blue-bright:    #6B93FF;
+    --blue-dim:       rgba(43,92,230,0.12);
+    --blue-dim2:      rgba(43,92,230,0.06);
+
+    --silver:         #8EA4C8;
+    --silver-dim:     rgba(142,164,200,0.08);
+  }
+
+  html, body { height: 100%; }
+
+  body {
+    background: var(--bg);
+    font-family: 'Outfit', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Subtle grid */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.012) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.012) 1px, transparent 1px);
+    background-size: 72px 72px;
+    pointer-events: none;
+  }
+
+  /* Ambient glow */
+  .glow {
+    position: fixed;
+    border-radius: 50%;
+    pointer-events: none;
+  }
+  .glow-1 {
+    width: 700px; height: 700px;
+    background: radial-gradient(circle, rgba(43,92,230,0.07) 0%, transparent 65%);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -60%);
+  }
+  .glow-2 {
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(107,147,255,0.04) 0%, transparent 70%);
+    bottom: -100px; right: -100px;
+  }
+
+  /* ── Wrapper ── */
+  .wrapper {
+    width: 100%;
+    max-width: 720px;
+    padding: 28px 24px;
+    position: relative;
+    z-index: 1;
+    animation: rise 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(28px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Top bar ── */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 28px;
+    animation: rise 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.08s both;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .brand-logo {
+    width: 34px; height: 34px;
+    background: var(--blue-dim);
+    border: 1px solid rgba(43,92,230,0.35);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+  }
+
+  .brand-logo::before {
+    content: '';
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--blue-mid);
+    box-shadow: 0 0 10px rgba(64,112,244,0.6);
+  }
+
+  .brand-wordmark {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  .brand-top {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-primary);
+  }
+
+  .brand-sub {
+    font-size: 9px;
+    font-weight: 400;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .status-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid rgba(43,92,230,0.25);
+    background: var(--blue-dim2);
+    border-radius: 3px;
+    padding: 6px 14px;
+  }
+
+  .status-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--blue-bright);
+    box-shadow: 0 0 6px rgba(107,147,255,0.8);
+    animation: pulse 2.5s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; box-shadow: 0 0 6px rgba(107,147,255,0.8); }
+    50%       { opacity: 0.5; box-shadow: 0 0 2px rgba(107,147,255,0.3); }
+  }
+
+  .status-text {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--blue-bright);
+  }
+
+  /* ── Memo card ── */
+  .memo {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Blue top accent line */
+  .memo::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent 0%, var(--blue) 30%, var(--blue-bright) 60%, transparent 100%);
+  }
+
+  /* ── Memo metadata strip ── */
+  .memo-meta {
+    padding: 24px 52px;
+    border-bottom: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 24px;
+    background: var(--surface-2);
+    animation: rise 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.18s both;
+  }
+
+  .meta-item {}
+
+  .meta-key {
+    font-size: 8px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 5px;
+  }
+
+  .meta-val {
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--text-secondary);
+    letter-spacing: 0.04em;
+  }
+
+  .meta-val.highlight {
+    color: var(--blue-bright);
+    font-weight: 500;
+  }
+
+  /* ── Memo type header ── */
+  .memo-type-bar {
+    padding: 20px 52px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    animation: rise 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.26s both;
+  }
+
+  .type-badge {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--blue-mid);
+    background: var(--blue-dim);
+    border: 1px solid rgba(43,92,230,0.2);
+    border-radius: 2px;
+    padding: 4px 10px;
+    white-space: nowrap;
+  }
+
+  .type-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--text-muted);
+    letter-spacing: 0.06em;
+  }
+
+  /* ── Memo body ── */
+  .memo-body {
+    padding: 52px 52px 44px;
+    animation: rise 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.34s both;
+  }
+
+  .recipient-line {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .recipient-line::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .recipient-name {
+    color: var(--silver);
+  }
+
+  .memo-heading {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 42px;
+    font-weight: 300;
+    line-height: 1.25;
+    color: var(--text-primary);
+    margin-bottom: 36px;
+    letter-spacing: -0.02em;
+  }
+
+  .memo-heading em {
+    font-style: italic;
+    color: var(--blue-bright);
+  }
+
+  .memo-body-text {
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--text-secondary);
+    line-height: 1.85;
+    max-width: 500px;
+    padding-left: 20px;
+    border-left: 2px solid var(--blue-dim);
+    position: relative;
+  }
+
+  .memo-body-text::before {
+    content: '';
+    position: absolute;
+    left: -1px; top: 0;
+    width: 2px; height: 30px;
+    background: var(--blue-mid);
+  }
+
+  /* ── Memo footer / signature ── */
+  .memo-footer {
+    padding: 28px 52px;
+    border-top: 1px solid var(--border);
+    background: var(--surface-2);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    animation: rise 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.44s both;
+  }
+
+  .sig-block {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+
+  .sig-monogram {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: var(--blue-dim);
+    border: 1px solid rgba(43,92,230,0.3);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 17px;
+    font-style: italic;
+    font-weight: 600;
+    color: var(--blue-bright);
+    letter-spacing: 0.04em;
+  }
+
+  .sig-details {}
+
+  .sig-role {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+  }
+
+  .sig-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 20px;
+    font-weight: 400;
+    font-style: italic;
+    color: var(--text-primary);
+    letter-spacing: 0.06em;
+  }
+
+  .confidential-tag {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .conf-line {
+    width: 24px;
+    height: 1px;
+    background: var(--text-muted);
+  }
+
+  .conf-text {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  /* ── Bottom strip ── */
+  .bottomstrip {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 0 0;
+    animation: rise 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.54s both;
+  }
+
+  .strip-left {
+    font-size: 9px;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .strip-right {
+    font-size: 9px;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+  }
+
+  .strip-right span { color: var(--blue); }
+
+  /* Responsive */
+  @media (max-width: 580px) {
+    .memo-meta { grid-template-columns: 1fr 1fr; padding: 20px 28px; }
+    .memo-type-bar, .memo-body, .memo-footer { padding-left: 28px; padding-right: 28px; }
+    .memo-heading { font-size: 30px; }
+    .memo-footer { flex-direction: column; gap: 20px; align-items: flex-start; }
+    .topbar { flex-direction: column; gap: 14px; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<div class="glow glow-1"></div>
+<div class="glow glow-2"></div>
+
+<div class="wrapper">
+
+  <!-- Top bar -->
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-logo"></div>
+      <div class="brand-wordmark">
+        <div class="brand-top">CentroSaúde</div>
+        <div class="brand-sub">Dirección General</div>
+      </div>
+    </div>
+    <div class="status-pill">
+      <div class="status-dot"></div>
+      <span class="status-text">Pendiente de respuesta</span>
+    </div>
+  </div>
+
+  <!-- Memo card -->
+  <div class="memo">
+
+    <!-- Metadata strip -->
+    <div class="memo-meta">
+      <div class="meta-item">
+        <div class="meta-key">Referencia</div>
+        <div class="meta-val highlight">MEM-DG-001</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-key">Fecha</div>
+        <div class="meta-val">17 de marzo, 2026</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-key">Clasificación</div>
+        <div class="meta-val">Uso Interno</div>
+      </div>
+    </div>
+
+    <!-- Type bar -->
+    <div class="memo-type-bar">
+      <span class="type-badge">Memorando</span>
+      <span class="type-title">Solicitud de especificaciones técnicas · Configuración de sistema</span>
+    </div>
+
+    <!-- Body -->
+    <div class="memo-body">
+      <div class="recipient-line">
+        Para: <span class="recipient-name">Fernando</span>
+      </div>
+      <div class="memo-heading">
+        Pásame las especificaciones<br>
+        para <em>terminar de configurar.</em>
+      </div>
+      <div class="memo-body-text">
+        Se solicita a la brevedad posible el envío de las especificaciones técnicas requeridas para concluir la configuración del sistema. La continuidad del proyecto depende de esta información.
+      </div>
+    </div>
+
+    <!-- Footer / Signature -->
+    <div class="memo-footer">
+      <div class="sig-block">
+        <div class="sig-monogram">CC</div>
+        <div class="sig-details">
+          <div class="sig-role">Atentamente</div>
+          <div class="sig-name">CC</div>
+        </div>
+      </div>
+      <div class="confidential-tag">
+        <div class="conf-line"></div>
+        <div class="conf-text">Documento Confidencial</div>
+        <div class="conf-line"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Bottom strip -->
+  <div class="bottomstrip">
+    <span class="strip-left">Gerencia General · Comunicación Interna</span>
+    <span class="strip-right"><span>centrosaude</span>.com</span>
+  </div>
+
+</div>
+
+</body>
+</html>
